@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P2A Funnel — Netcore × Google</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,system-ui,sans-serif;background:#F7F8FC;color:#0F1629;font-size:13px}
+.hdr{background:#0F1629;border-bottom:2px solid #E8580A;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:50px;position:sticky;top:0;z-index:10}
+.logo{font-weight:700;font-size:16px;color:#fff}.logo span{color:#E8580A}
+.tag{font-size:10px;color:rgba(255,255,255,0.4);padding:2px 8px;border:1px solid rgba(255,255,255,0.15);border-radius:100px;letter-spacing:.07em;margin-left:10px}
+.main{max-width:1400px;margin:0 auto;padding:20px}
+.stats{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:12px}
+.stat{background:#fff;border:1px solid #E4E8F0;border-radius:8px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .15s;user-select:none}
+.stat:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+.stat.active{box-shadow:0 0 0 2.5px currentColor;transform:translateY(-2px)}
+.sn{font-size:22px;font-weight:700;line-height:1;margin-bottom:3px}
+.sl{font-size:10px;color:#6B7A99;line-height:1.3}
+.fbar{display:flex;height:6px;border-radius:3px;overflow:hidden;gap:2px;margin-bottom:12px}
+.fbar div{border-radius:3px}
+.types{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.tc{background:#fff;border:1px solid #E4E8F0;border-radius:8px;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.tdot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.tlbl{font-size:10px;color:#6B7A99;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px}
+.tnum{font-size:20px;font-weight:700;color:#0F1629}
+.tbadges{margin-left:auto;display:flex;flex-direction:column;gap:3px;align-items:flex-end}
+.filters{background:#fff;border:1px solid #E4E8F0;border-radius:8px;padding:12px 14px;margin-bottom:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input,select{border:1px solid #E4E8F0;border-radius:7px;padding:6px 10px;font-size:12px;font-family:inherit;color:#0F1629;background:#F7F8FC;outline:none}
+input:focus,select:focus{border-color:#E8580A}
+input{flex:1;min-width:130px}
+button{border:1px solid #E4E8F0;border-radius:7px;padding:6px 12px;font-size:11px;font-family:inherit;background:#F7F8FC;color:#6B7A99;cursor:pointer}
+button:hover{background:#FEF2F2;border-color:#FECACA;color:#991B1B}
+.cnt{font-size:11px;color:#6B7A99;margin-left:auto;white-space:nowrap}
+.tw{background:#fff;border:1px solid #E4E8F0;border-radius:8px;overflow:hidden}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+thead tr{background:#0F1629}
+th{padding:10px 12px;text-align:left;font-size:10px;font-weight:600;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+tbody tr{border-bottom:1px solid #F0F2F8}
+tbody tr:hover{background:#F5F7FF}
+td{padding:9px 12px;vertical-align:middle}
+.t1{color:#9CA3AF;font-size:11px}
+.t2{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.t4{color:#6B7A99;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:100px;font-size:10.5px;font-weight:600;border:1px solid;white-space:nowrap}
+.dot{width:5px;height:5px;border-radius:50%;display:inline-block}
+.pill{padding:1px 7px;border-radius:4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.ind-badge{padding:2px 8px;border-radius:4px;font-size:10.5px;font-weight:600;white-space:nowrap;display:inline-block}
+.empty{text-align:center;padding:50px;color:#6B7A99}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div style="display:flex;align-items:center">
+    <span class="logo">Netcore <span>×</span> Google</span>
+    <span class="tag">P2A PILOT FUNNEL</span>
+  </div>
+  <span style="font-size:11px;color:rgba(255,255,255,0.35)">157 brands · Combined TAL · Updated Aug 3, 2026</span>
+</div>
+<div class="main">
+  <div class="stats" id="stats"></div>
+  <div class="fbar" id="fbar"></div>
+  <div class="types" id="types"></div>
+  <div class="filters">
+    <input id="si" oninput="go()" placeholder="🔍  Search brand…">
+    <select id="ft" onchange="go()"><option value="">All types</option><option value="paid">Paid Ads</option><option value="top">Organic — Top</option><option value="other">Organic — Other</option></select>
+    <select id="fs" onchange="go()"><option value="">All stages</option><option value="live">Live</option><option value="uat">UAT</option><option value="dev">In Development</option><option value="approved">Approval Received</option><option value="conv">In Discussion</option><option value="pitched">Pitched</option><option value="declined">Declined</option><option value="notreach">Not Reached</option></select>
+    <select id="fi" onchange="updateSubFilter();go()"><option value="">All industries</option></select>
+    <select id="fsi" onchange="go()"><option value="">All sub-segments</option></select>
+    <select id="fa" onchange="go()"><option value="">All AMs</option></select>
+    <button onclick="clr()">Clear</button>
+    <span class="cnt" id="cnt"></span>
+  </div>
+  <div class="tw">
+    <table>
+      <colgroup><col style="width:36px"><col style="width:210px"><col style="width:75px"><col style="width:130px"><col style="width:110px"><col style="width:140px"><col style="width:120px"></colgroup>
+      <thead><tr><th>#</th><th>Brand</th><th>Type</th><th>Industry</th><th>Sub-segment</th><th>AM</th><th>Stage</th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="empty" id="empty" style="display:none">No brands match your filters.</div>
+  </div>
+</div>
+<script>
+const SC={live:{l:"Live",c:"#15803D",bg:"#F0FDF4",bd:"#BBF7D0",d:"#16A34A"},uat:{l:"UAT",c:"#1D4ED8",bg:"#EFF6FF",bd:"#BFDBFE",d:"#2563EB"},dev:{l:"In Dev",c:"#6D28D9",bg:"#F5F3FF",bd:"#DDD6FE",d:"#7C3AED"},approved:{l:"Approved",c:"#92400E",bg:"#FFFBEB",bd:"#FDE68A",d:"#D97706"},conv:{l:"In Discussion",c:"#0F766E",bg:"#F0FDFA",bd:"#99F6E4",d:"#0D9488"},pitched:{l:"Pitched",c:"#374151",bg:"#F9FAFB",bd:"#E5E7EB",d:"#6B7280"},declined:{l:"Declined",c:"#991B1B",bg:"#FEF2F2",bd:"#FECACA",d:"#DC2626"},notreach:{l:"Not Reached",c:"#9CA3AF",bg:"#F9FAFB",bd:"#E5E7EB",d:"#D1D5DB"}};
+const TC={paid:{l:"Paid Ads",d:"#D97706",pb:"#FEF3C7",pc:"#92400E"},top:{l:"Organic — Top",d:"#2563EB",pb:"#DBEAFE",pc:"#1D4ED8"},other:{l:"Organic — Other",d:"#7C3AED",pb:"#EDE9FE",pc:"#6D28D9"}};
+const ST=[["total","Total","#0F1629","#0F1629"],["live","Live","#15803D","#16A34A"],["uat","UAT","#1D4ED8","#2563EB"],["dev","In Dev","#6D28D9","#7C3AED"],["approved","Approved","#92400E","#D97706"],["conv","In Discussion","#0F766E","#0D9488"],["pitched","Pitched","#374151","#6B7280"],["declined","Declined","#991B1B","#DC2626"]];
+const IC={"BFSI":{bg:"#EFF6FF",c:"#1D4ED8"},"Automotive":{bg:"#F1F5F9",c:"#334155"},"E-commerce":{bg:"#FDF4FF",c:"#7E22CE"},"Retail":{bg:"#FDF4FF",c:"#7E22CE"},"FMCG":{bg:"#F7FEE7",c:"#3F6212"},"EdTech":{bg:"#EEF2FF",c:"#3730A3"},"Healthcare":{bg:"#FEF2F2",c:"#991B1B"},"Travel":{bg:"#ECFEFF",c:"#0E7490"},"Hospitality":{bg:"#ECFEFF",c:"#0E7490"},"Food Delivery":{bg:"#FFF7ED",c:"#C2410C"},"Consumer Electronics":{bg:"#F0FDF4",c:"#15803D"},"Media":{bg:"#F5F3FF",c:"#6D28D9"},"Real Estate":{bg:"#FFFBEB",c:"#92400E"},"Logistics":{bg:"#F0FDF4",c:"#065F46"},"Telecom":{bg:"#EFF6FF",c:"#1E3A5F"},"Gifting":{bg:"#FDF2F8",c:"#9D174D"},"Lifestyle":{bg:"#FDF2F8",c:"#9D174D"},"Home Appliances":{bg:"#F0FDFA",c:"#0F766E"},"Urban Services":{bg:"#F9FAFB",c:"#374151"},"Conglomerate":{bg:"#F9FAFB",c:"#374151"},"Government":{bg:"#FFF7ED",c:"#92400E"},"Jobs/Matrimony":{bg:"#FDF4FF",c:"#7E22CE"},"B2B SaaS":{bg:"#F0FDF4",c:"#15803D"},"Gaming":{bg:"#EEF2FF",c:"#3730A3"},"Social Media":{bg:"#EEF2FF",c:"#3730A3"}};
+const DATA=[{"b":"Eicher Motors","t":"paid","a":"Astha Jain","s":"notreach","i":"Automotive","si":""},{"b":"Global Car Group","t":"paid","a":"","s":"notreach","i":"Automotive","si":""},{"b":"Hero Moto Corp","t":"paid","a":"Astha/Shubham","s":"dev","i":"Automotive","si":""},{"b":"Hyundai Motor Group","t":"paid","a":"Bijal Panchmatiya","s":"declined","i":"Automotive","si":""},{"b":"Mahindra & Mahindra","t":"paid","a":"Rahul Pillai","s":"pitched","i":"Automotive","si":""},{"b":"Suzuki Motor","t":"paid","a":"Bijal Panchmatiya","s":"conv","i":"Automotive","si":""},{"b":"T. V. Sundaram Iyengar & Sons","t":"paid","a":"Mohamed","s":"pitched","i":"Automotive","si":""},{"b":"Tata Group","t":"paid","a":"Kunal Khatri","s":"pitched","i":"Automotive","si":""},{"b":"Valuedrive Technologies","t":"paid","a":"","s":"notreach","i":"Automotive","si":""},{"b":"Volkswagen Group","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Automotive","si":""},{"b":"Amazon Corp","t":"paid","a":"","s":"notreach","i":"E-commerce","si":""},{"b":"Reliance Industries","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Conglomerate","si":""},{"b":"Walmart","t":"paid","a":"Pallavi Srivastava","s":"notreach","i":"E-commerce","si":""},{"b":"Abbott Laboratories","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Healthcare","si":""},{"b":"Bundl Technologies","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Food Delivery","si":""},{"b":"Coca-Cola Company","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"Colgate-Palmolive","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"Ferrero","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"Godrej & Boyce","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"Haleon","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"Honasa Consumer","t":"paid","a":"Sunil","s":"pitched","i":"FMCG","si":""},{"b":"ITC","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"Kenvue","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"L'Oreal","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"Marico","t":"paid","a":"Bijal Panchmatiya","s":"declined","i":"FMCG","si":""},{"b":"Mars","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"Maxingvest","t":"paid","a":"","s":"notreach","i":"FMCG","si":""},{"b":"Mondelez","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"Nestle","t":"paid","a":"Bijal Panchmatiya","s":"conv","i":"FMCG","si":""},{"b":"PepsiCo","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"Procter & Gamble","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"Reckitt Benckiser Group","t":"paid","a":"Bijal Panchmatiya","s":"conv","i":"FMCG","si":""},{"b":"Unilever","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"Zomato","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Food Delivery","si":""},{"b":"Aakash Institute","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"EdTech","si":""},{"b":"Amity University","t":"paid","a":"","s":"notreach","i":"EdTech","si":""},{"b":"EMERITUS Institute of Management","t":"paid","a":"","s":"notreach","i":"EdTech","si":""},{"b":"Government Of India","t":"paid","a":"","s":"notreach","i":"Government","si":""},{"b":"Great Learning","t":"paid","a":"Subhalaxmi Mohanty","s":"notreach","i":"EdTech","si":""},{"b":"Simplilearn","t":"paid","a":"Harsh Shrivastava","s":"pitched","i":"EdTech","si":""},{"b":"Unacademy","t":"paid","a":"Aman Bothra","s":"notreach","i":"EdTech","si":""},{"b":"Upgrad","t":"paid","a":"Harsh Shrivastava","s":"conv","i":"EdTech","si":""},{"b":"Winspark Innovations Learning","t":"paid","a":"","s":"notreach","i":"EdTech","si":""},{"b":"Aditya Birla Group","t":"paid","a":"Bijal Panchmatiya","s":"conv","i":"Conglomerate","si":""},{"b":"Axis Bank","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"BFSI","si":"Banking"},{"b":"Bajaj Group (BALIC)","t":"paid","a":"Romit","s":"conv","i":"BFSI","si":"Insurance"},{"b":"HDFC","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"BFSI","si":"Banking"},{"b":"ICICI","t":"paid","a":"Rithika Salian","s":"notreach","i":"BFSI","si":"Banking"},{"b":"ICICI Prudential Mutual fund","t":"paid","a":"Bijal Panchmatiya","s":"declined","i":"BFSI","si":"Insurance"},{"b":"Kotak Mahindra (amc)","t":"paid","a":"Bijal Panchmatiya","s":"approved","i":"BFSI","si":"Banking"},{"b":"Motilal Oswal Financial Services (amc)","t":"paid","a":"Bijal Panchmatiya","s":"approved","i":"BFSI","si":"Fintech"},{"b":"Star Health & Allied Insurance","t":"paid","a":"Harsh Shrivastava","s":"conv","i":"BFSI","si":"Insurance"},{"b":"State Bank of India","t":"paid","a":"Rithika Salian","s":"notreach","i":"BFSI","si":"Banking"},{"b":"Acko General Insurance","t":"paid","a":"Harsh Shrivastava","s":"conv","i":"BFSI","si":"Insurance"},{"b":"Angel Broking","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"BFSI","si":"NBFC/Lending"},{"b":"eTechAces Marketing & Consulting","t":"paid","a":"Faisal Kidwai","s":"notreach","i":"B2B SaaS","si":""},{"b":"Go-MMT Group","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Travel","si":""},{"b":"Navi Technologies","t":"paid","a":"Harsh Shrivastava","s":"pitched","i":"BFSI","si":"NBFC/Lending"},{"b":"One97","t":"paid","a":"Shubham Jain","s":"declined","i":"BFSI","si":"Fintech"},{"b":"Razorpay Software","t":"paid","a":"Bijal Panchmatiya","s":"conv","i":"BFSI","si":"Fintech"},{"b":"Rksv Securities / 5 Paisa","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"BFSI","si":"NBFC/Lending"},{"b":"Bennett & Coleman","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Media","si":""},{"b":"Playsimple Games","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Gaming","si":""},{"b":"Zepto Now","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"E-commerce","si":""},{"b":"Bharti","t":"paid","a":"Faisal Kidwai","s":"notreach","i":"Telecom","si":""},{"b":"Essel Group","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Media","si":""},{"b":"Info Edge","t":"paid","a":"Astha Jain","s":"notreach","i":"Jobs/Matrimony","si":""},{"b":"Livspace","t":"paid","a":"Harsh Shrivastava","s":"conv","i":"Real Estate","si":""},{"b":"Matrimony.com","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Jobs/Matrimony","si":""},{"b":"Nobroker Technologies Solutions","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Real Estate","si":""},{"b":"People Interactive (shaadi)","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Jobs/Matrimony","si":""},{"b":"ShareChat","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Social Media","si":""},{"b":"Sony Corporation","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Media","si":""},{"b":"Spotify","t":"paid","a":"Bijal Panchmatiya","s":"notreach","i":"Media","si":""},{"b":"The Walt Disney Company","t":"paid","a":"Bijal Panchmatiya","s":"notreach","i":"Media","si":""},{"b":"Urban Company","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Urban Services","si":""},{"b":"Angara","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Retail","si":""},{"b":"Apollo Hospitals Enterprise","t":"paid","a":"Bijal Panchmatiya","s":"live","i":"Healthcare","si":""},{"b":"Asian Paints","t":"paid","a":"Utkarsh Bhansali","s":"conv","i":"FMCG","si":""},{"b":"Fabindia Overseas","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Retail","si":""},{"b":"Fashnear Technologies (Meesho)","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"E-commerce","si":""},{"b":"First Cry","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Retail","si":""},{"b":"fnp.com","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Gifting","si":""},{"b":"Malabar Group","t":"paid","a":"Harsh Shrivastava","s":"pitched","i":"Retail","si":""},{"b":"Manash Lifestyle","t":"paid","a":"Lucy","s":"pitched","i":"Retail","si":""},{"b":"Nykaa","t":"paid","a":"Rahul Pillai","s":"pitched","i":"Retail","si":""},{"b":"Valyoo Technologies (Lenskart)","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Retail","si":""},{"b":"Apple","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Consumer Electronics","si":""},{"b":"Bayport International","t":"paid","a":"","s":"notreach","i":"Consumer Electronics","si":""},{"b":"BBK Electronics","t":"paid","a":"","s":"notreach","i":"Consumer Electronics","si":""},{"b":"Imagine Marketing","t":"paid","a":"","s":"notreach","i":"Consumer Electronics","si":""},{"b":"Lenovo","t":"paid","a":"Bijal Panchmatiya","s":"declined","i":"Consumer Electronics","si":""},{"b":"Nexxbase Marketing (Bose)","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Consumer Electronics","si":""},{"b":"Samsung Group","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Consumer Electronics","si":""},{"b":"Xiaomi","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Consumer Electronics","si":""},{"b":"Zoho Corporation","t":"paid","a":"","s":"notreach","i":"B2B SaaS","si":""},{"b":"Headout","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Travel","si":""},{"b":"Hyatt","t":"paid","a":"Bijal Panchmatiya","s":"pitched","i":"Hospitality","si":""},{"b":"Oyo Group","t":"paid","a":"","s":"notreach","i":"Hospitality","si":""},{"b":"TATA 1MG HEALTHCARE SOLUTIONS PRIVATE LIMITED","t":"paid","a":"Shubham Jain","s":"approved","i":"Healthcare","si":""},{"b":"Stellantis (jeep and citroen)","t":"paid","a":"Bijal Panchmatiya","s":"declined","i":"Automotive","si":""},{"b":"Fino Payments Bank","t":"paid","a":"Bijal Panchmatiya","s":"approved","i":"BFSI","si":"Fintech"},{"b":"HSBC Mutual Fund","t":"paid","a":"Harsh","s":"approved","i":"BFSI","si":"Banking"},{"b":"Bajaj Finserv Direct Ltd","t":"top","a":"Romit","s":"declined","i":"BFSI","si":"NBFC/Lending"},{"b":"Asian Paints Limited","t":"top","a":"Heena","s":"uat","i":"FMCG","si":""},{"b":"Bajaj Auto Credit","t":"top","a":"","s":"notreach","i":"BFSI","si":"NBFC/Lending"},{"b":"Ujjivan Small Finance Bank Limited","t":"top","a":"","s":"notreach","i":"BFSI","si":"Banking"},{"b":"Redbus","t":"top","a":"","s":"notreach","i":"Travel","si":""},{"b":"Unacademy (leadership)","t":"top","a":"","s":"notreach","i":"EdTech","si":""},{"b":"ICICI PRUDENTIAL LIFE INSURANCE COMPANY LIMITED","t":"top","a":"","s":"declined","i":"BFSI","si":"Insurance"},{"b":"Aditya Birla Health Insurance Co. Ltd.","t":"top","a":"","s":"notreach","i":"BFSI","si":"Insurance"},{"b":"Poonawalla (Fincorp)","t":"top","a":"","s":"notreach","i":"BFSI","si":"NBFC/Lending"},{"b":"Yatra Online Ltd","t":"top","a":"","s":"notreach","i":"Travel","si":""},{"b":"Apollo Hospitals Enterprise Ltd","t":"top","a":"Bijal Panchmatiya","s":"live","i":"Healthcare","si":""},{"b":"HDFC Credila Financial Services Limited","t":"top","a":"Utkarsh","s":"live","i":"BFSI","si":"NBFC/Lending"},{"b":"Ferns N Petals Pvt. Ltd.","t":"top","a":"","s":"notreach","i":"Gifting","si":""},{"b":"Indusind Bank Limited","t":"top","a":"Rahul Sinha","s":"pitched","i":"BFSI","si":"Banking"},{"b":"Magicbricks","t":"top","a":"Sunil Kumar","s":"notreach","i":"Real Estate","si":""},{"b":"Skoda","t":"top","a":"Bijal Panchmatiya","s":"uat","i":"Automotive","si":""},{"b":"Ujjivan","t":"top","a":"Krishna Prasad","s":"notreach","i":"BFSI","si":"Banking"},{"b":"Groww","t":"top","a":"Krishna Prasad","s":"notreach","i":"BFSI","si":"Fintech"},{"b":"Cleartax","t":"top","a":"Krishna Prasad","s":"pitched","i":"BFSI","si":"Fintech"},{"b":"Airtel Paytments Bank","t":"top","a":"Bijal Panchmatiya","s":"conv","i":"BFSI","si":"Fintech"},{"b":"HDFC Ergo","t":"top","a":"Bijal Panchmatiya","s":"pitched","i":"BFSI","si":"Insurance"},{"b":"TATA AIG","t":"top","a":"Bijal Panchmatiya","s":"pitched","i":"BFSI","si":"Insurance"},{"b":"Hyphen","t":"top","a":"Bijal Panchmatiya","s":"pitched","i":"Real Estate","si":""},{"b":"Pidilite","t":"top","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"Toyota","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"Automotive","si":""},{"b":"Malabar Gold and Diamonds","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"Retail","si":""},{"b":"Swiggy","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"Food Delivery","si":""},{"b":"Upgrad","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"EdTech","si":""},{"b":"Cleartrip","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"Travel","si":""},{"b":"RBL Bank","t":"top","a":"Bijal Panchmatiya","s":"pitched","i":"BFSI","si":"Banking"},{"b":"LIC India","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"BFSI","si":"Insurance"},{"b":"PhonePe","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"BFSI","si":"Fintech"},{"b":"1Mg","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"Healthcare","si":""},{"b":"Maruti Suzuki","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"Automotive","si":""},{"b":"Uniqlo","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"Lifestyle","si":""},{"b":"Practo","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"Healthcare","si":""},{"b":"Titan","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"Lifestyle","si":""},{"b":"Tanishq","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"Lifestyle","si":""},{"b":"Karnataka Bank","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"BFSI","si":"Banking"},{"b":"MakeMyTrip","t":"top","a":"Harsh Shrivastava","s":"notreach","i":"Travel","si":""},{"b":"Puma","t":"top","a":"Bijal Panchmatiya","s":"live","i":"Retail","si":""},{"b":"adidas","t":"top","a":"Bijal Panchmatiya","s":"pitched","i":"Retail","si":""},{"b":"Shaadi.com","t":"top","a":"Bijal Panchmatiya","s":"pitched","i":"Jobs/Matrimony","si":""},{"b":"DBS Bank","t":"top","a":"Bijal Panchmatiya","s":"pitched","i":"BFSI","si":"Banking"},{"b":"Haier","t":"top","a":"Bijal Panchmatiya","s":"conv","i":"Home Appliances","si":""},{"b":"Motorola","t":"top","a":"Bijal Panchmatiya","s":"pitched","i":"Consumer Electronics","si":""},{"b":"Practo","t":"top","a":"Bijal Panchmatiya","s":"pitched","i":"Healthcare","si":""},{"b":"Loreal","t":"top","a":"Bijal Panchmatiya","s":"pitched","i":"FMCG","si":""},{"b":"Blue Dart","t":"top","a":"Bijal Panchmatiya","s":"pitched","i":"Logistics","si":""},{"b":"Marks and Spencers","t":"top","a":"Shubham Jain","s":"notreach","i":"Retail","si":""},{"b":"Paisabazaar","t":"top","a":"Shubham Jain","s":"notreach","i":"BFSI","si":"Fintech"},{"b":"Policybazaar","t":"top","a":"Shubham Jain","s":"notreach","i":"BFSI","si":"Insurance"},{"b":"MakeMyTrip","t":"top","a":"Shubham Jain","s":"notreach","i":"Travel","si":""},{"b":"Equitas","t":"other","a":"Harsh","s":"uat","i":"BFSI","si":"Banking"}];
+
+let fil=[...DATA];
+function bdg(sk){const c=SC[sk]||SC.notreach;return`<span class="badge" style="border-color:${c.bd};background:${c.bg};color:${c.c}"><span class="dot" style="background:${c.d}"></span>${c.l}</span>`;}
+function pll(tk){const c=TC[tk]||TC.other;const l=tk==="paid"?"Paid":tk==="top"?"Org Top":"Org Other";return`<span class="pill" style="background:${c.pb};color:${c.pc}">${l}</span>`;}
+function ibdg(ind){if(!ind)return'<span style="color:#D1D5DB;font-size:11px">—</span>';const c=IC[ind]||{bg:"#F9FAFB",c:"#374151"};return`<span class="ind-badge" style="background:${c.bg};color:${c.c}">${ind}</span>`;}
+
+function init(){
+  const ct={total:DATA.length};Object.keys(SC).forEach(k=>ct[k]=0);DATA.forEach(r=>ct[r.s]++);
+  const byT={};DATA.forEach(r=>{if(!byT[r.t])byT[r.t]={total:0};byT[r.t].total++;byT[r.t][r.s]=(byT[r.t][r.s]||0)+1;});
+  document.getElementById("stats").innerHTML=ST.map(([k,l,c,bc])=>`<div class="stat" style="border-top:2px solid ${bc};color:${c}" onclick="statFilter('${k}')" title="Click to filter by ${l}"><div class="sn" style="color:${c}">${ct[k]||0}</div><div class="sl">${l}</div></div>`).join("");
+  document.getElementById("fbar").innerHTML=Object.entries(SC).map(([k,c])=>ct[k]>0?`<div style="flex:${ct[k]};background:${c.d}" title="${c.l}: ${ct[k]}"></div>`:"").join("");
+  document.getElementById("types").innerHTML=Object.entries(TC).map(([tk,tc])=>{const d=byT[tk]||{};const pos=["live","uat","dev"].filter(k=>d[k]>0);return`<div class="tc"><div class="tdot" style="background:${tc.d}"></div><div><div class="tlbl">${tc.l}</div><div class="tnum">${d.total||0}</div></div><div class="tbadges">${pos.map(k=>`<span class="badge" style="border-color:${SC[k].bd};background:${SC[k].bg};color:${SC[k].c};font-size:10px;padding:1px 6px"><span class="dot" style="background:${SC[k].d}"></span>${SC[k].l} ${d[k]}</span>`).join("")}</div></div>`;}).join("");
+  const inds=[...new Set(DATA.map(r=>r.i).filter(Boolean))].sort();
+  document.getElementById("fi").innerHTML='<option value="">All industries</option>'+inds.map(i=>`<option value="${i}">${i}</option>`).join("");
+  const ams=[...new Set(DATA.map(r=>r.a).filter(Boolean))].sort();
+  document.getElementById("fa").innerHTML='<option value="">All AMs</option>'+ams.map(a=>`<option value="${a}">${a}</option>`).join("");
+  go();
+}
+function updateSubFilter(){
+  const fi=document.getElementById("fi").value;
+  const subs=[...new Set(DATA.filter(r=>!fi||r.i===fi).map(r=>r.si).filter(Boolean))].sort();
+  document.getElementById("fsi").innerHTML='<option value="">All sub-segments</option>'+subs.map(s=>`<option value="${s}">${s}</option>`).join("");
+}
+function statFilter(k){
+  const fs=document.getElementById("fs");
+  const newVal=k==="total"?"":k;
+  if(fs.value===newVal){fs.value="";document.querySelectorAll(".stat").forEach(s=>s.classList.remove("active"));}
+  else{fs.value=newVal;document.querySelectorAll(".stat").forEach((s,i)=>{s.classList.toggle("active",ST[i][0]===k&&k!=="total");});}
+  go();
+}
+function go(){
+  const s=document.getElementById("si").value.toLowerCase();
+  const ft=document.getElementById("ft").value,fs=document.getElementById("fs").value;
+  const fi=document.getElementById("fi").value,fsi=document.getElementById("fsi").value,fa=document.getElementById("fa").value;
+  fil=DATA.filter(r=>{
+    if(s&&!r.b.toLowerCase().includes(s))return false;
+    if(ft&&r.t!==ft)return false;
+    if(fs&&r.s!==fs)return false;
+    if(fi&&r.i!==fi)return false;
+    if(fsi&&r.si!==fsi)return false;
+    if(fa&&r.a!==fa)return false;
+    return true;
+  });
+  document.getElementById("cnt").textContent=fil.length+" of "+DATA.length+" brands";
+  const tb=document.getElementById("tbody"),em=document.getElementById("empty");
+  if(!fil.length){tb.innerHTML="";em.style.display="block";return;}
+  em.style.display="none";
+  tb.innerHTML=fil.map((r,i)=>`<tr><td class="t1">${i+1}</td><td class="t2" title="${r.b}">${r.b}</td><td>${pll(r.t)}</td><td>${ibdg(r.i)}</td><td style="font-size:11px;color:#6B7A99">${r.si||"—"}</td><td class="t4" title="${r.a||""}">${r.a||"—"}</td><td>${bdg(r.s)}</td></tr>`).join("");
+}
+function clr(){document.getElementById("si").value="";["ft","fs","fi","fsi","fa"].forEach(id=>document.getElementById(id).value="");document.querySelectorAll(".stat").forEach(s=>s.classList.remove("active"));updateSubFilter();go();}
+init();
+</script>
+</body>
+</html>

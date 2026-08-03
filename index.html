@@ -62,6 +62,15 @@ td{padding:9px 12px;vertical-align:middle}
   <div class="fbar" id="fbar"></div>
   <div id="incTotal" style="text-align:right;font-size:12px;color:#15803D;font-weight:600;margin-bottom:8px;margin-top:-6px"></div>
   <div class="types" id="types"></div>
+  <div style="background:#fff;border:1px solid #E4E8F0;border-radius:8px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+    <span style="font-size:11px;color:#6B7A99;font-weight:600">UPDATE DATA</span>
+    <label for="csvUpload" style="cursor:pointer;background:#0F1629;color:#fff;border-radius:7px;padding:6px 14px;font-size:11px;font-weight:600;font-family:inherit;display:inline-flex;align-items:center;gap:6px">
+      📂 Upload CSV
+      <input type="file" id="csvUpload" accept=".csv" style="display:none" onchange="handleCSV(this)">
+    </label>
+    <span id="uploadStatus" style="font-size:11px;color:#6B7A99"></span>
+    <span style="font-size:11px;color:#D1D5DB;margin-left:auto">Upload the Combined TAL for P2A CSV to refresh all data instantly</span>
+  </div>
   <div class="filters">
     <input id="si" oninput="go()" placeholder="🔍  Search brand…">
     <select id="ft" onchange="go()"><option value="">All types</option><option value="paid">Paid Ads</option><option value="top">Organic — Top</option><option value="other">Organic — Other</option></select>
@@ -92,6 +101,63 @@ let fil=[...DATA];
 function bdg(sk){const c=SC[sk]||SC.notreach;return`<span class="badge" style="border-color:${c.bd};background:${c.bg};color:${c.c}"><span class="dot" style="background:${c.d}"></span>${c.l}</span>`;}
 function pll(tk){const c=TC[tk]||TC.other;const l=tk==="paid"?"Paid":tk==="top"?"Org Top":"Org Other";return`<span class="pill" style="background:${c.pb};color:${c.pc}">${l}</span>`;}
 function ibdg(ind){if(!ind)return'<span style="color:#D1D5DB;font-size:11px">—</span>';const c=IC[ind]||{bg:"#F9FAFB",c:"#374151"};return`<span class="ind-badge" style="background:${c.bg};color:${c.c}">${ind}</span>`;}
+
+
+const INDUSTRY_MAP={"Axis Bank":["BFSI","Banking"],"HDFC":["BFSI","Banking"],"ICICI":["BFSI","Banking"],"Kotak Mahindra (amc)":["BFSI","Banking"],"State Bank of India":["BFSI","Banking"],"Indusind Bank Limited":["BFSI","Banking"],"RBL Bank":["BFSI","Banking"],"DBS Bank":["BFSI","Banking"],"Karnataka Bank":["BFSI","Banking"],"Ujjivan Small Finance Bank Limited":["BFSI","Banking"],"Ujjivan":["BFSI","Banking"],"Equitas":["BFSI","Banking"],"HSBC Mutual Fund":["BFSI","Banking"],"Star Health & Allied Insurance":["BFSI","Insurance"],"Acko General Insurance":["BFSI","Insurance"],"HDFC Ergo":["BFSI","Insurance"],"TATA AIG":["BFSI","Insurance"],"ICICI Prudential Mutual fund":["BFSI","Insurance"],"ICICI PRUDENTIAL LIFE INSURANCE COMPANY LIMITED":["BFSI","Insurance"],"ICICI PRUDENTIAL LIFE INSURANCE":["BFSI","Insurance"],"Aditya Birla Health Insurance Co. Ltd.":["BFSI","Insurance"],"Aditya Birla Health Insurance":["BFSI","Insurance"],"Bajaj Group (BALIC)":["BFSI","Insurance"],"LIC India":["BFSI","Insurance"],"Policybazaar":["BFSI","Insurance"],"HDFC Credila Financial Services Limited":["BFSI","NBFC/Lending"],"HDFC Credila Financial Services":["BFSI","NBFC/Lending"],"Bajaj Finserv Direct Ltd":["BFSI","NBFC/Lending"],"Bajaj Auto Credit":["BFSI","NBFC/Lending"],"Poonawalla (Fincorp)":["BFSI","NBFC/Lending"],"Navi Technologies":["BFSI","NBFC/Lending"],"Rksv Securities / 5 Paisa":["BFSI","NBFC/Lending"],"Angel Broking":["BFSI","NBFC/Lending"],"Fino Payments Bank":["BFSI","Fintech"],"PhonePe":["BFSI","Fintech"],"One97":["BFSI","Fintech"],"Razorpay Software":["BFSI","Fintech"],"Groww":["BFSI","Fintech"],"Cleartax":["BFSI","Fintech"],"Motilal Oswal Financial Services (amc)":["BFSI","Fintech"],"Airtel Payments Bank":["BFSI","Fintech"],"Airtel Paytments Bank":["BFSI","Fintech"],"Paisabazaar":["BFSI","Fintech"],"Eicher Motors":["Automotive",""],"Hyundai Motor Group":["Automotive",""],"Mahindra & Mahindra":["Automotive",""],"Suzuki Motor":["Automotive",""],"T. V. Sundaram Iyengar & Sons":["Automotive",""],"Tata Group":["Automotive",""],"Valuedrive Technologies":["Automotive",""],"Volkswagen Group":["Automotive",""],"Skoda":["Automotive",""],"Toyota":["Automotive",""],"Maruti Suzuki":["Automotive",""],"Hero Moto Corp":["Automotive",""],"Global Car Group":["Automotive",""],"Stellantis (jeep and citroen)":["Automotive",""],"Amazon Corp":["E-commerce",""],"Walmart":["E-commerce",""],"Zepto Now":["E-commerce",""],"Fashnear Technologies (Meesho)":["E-commerce",""],"Fabindia Overseas":["Retail",""],"First Cry":["Retail",""],"Puma":["Retail",""],"adidas":["Retail",""],"Valyoo Technologies (Lenskart)":["Retail",""],"Angara":["Retail",""],"Manash Lifestyle":["Retail",""],"Malabar Group":["Retail",""],"Malabar Gold and Diamonds":["Retail",""],"Nykaa":["Retail",""],"Marks and Spencers":["Retail",""],"Bundl Technologies":["Food Delivery",""],"Zomato":["Food Delivery",""],"Swiggy":["Food Delivery",""],"Coca-Cola Company":["FMCG",""],"Colgate-Palmolive":["FMCG",""],"Ferrero":["FMCG",""],"Godrej & Boyce":["FMCG",""],"Haleon":["FMCG",""],"Honasa Consumer":["FMCG",""],"ITC":["FMCG",""],"Kenvue":["FMCG",""],"L'Oreal":["FMCG",""],"Marico":["FMCG",""],"Mars":["FMCG",""],"Maxingvest":["FMCG",""],"Mondelez":["FMCG",""],"Nestle":["FMCG",""],"PepsiCo":["FMCG",""],"Procter & Gamble":["FMCG",""],"Reckitt Benckiser Group":["FMCG",""],"Unilever":["FMCG",""],"Pidilite":["FMCG",""],"Loreal":["FMCG",""],"Asian Paints":["FMCG",""],"Asian Paints Limited":["FMCG",""],"Aakash Institute":["EdTech",""],"Amity University":["EdTech",""],"EMERITUS Institute of Management":["EdTech",""],"Great Learning":["EdTech",""],"Simplilearn":["EdTech",""],"Unacademy":["EdTech",""],"Unacademy (leadership)":["EdTech",""],"Upgrad":["EdTech",""],"Winspark Innovations Learning":["EdTech",""],"Government Of India":["Government",""],"Apollo Hospitals Enterprise":["Healthcare",""],"Apollo Hospitals Enterprise Ltd":["Healthcare",""],"Abbott Laboratories":["Healthcare",""],"1Mg":["Healthcare",""],"TATA 1MG HEALTHCARE SOLUTIONS PRIVATE LIMITED":["Healthcare",""],"TATA 1MG":["Healthcare",""],"Practo":["Healthcare",""],"Go-MMT Group":["Travel",""],"Redbus":["Travel",""],"Yatra Online Ltd":["Travel",""],"Cleartrip":["Travel",""],"MakeMyTrip":["Travel",""],"Headout":["Travel",""],"Hyatt":["Hospitality",""],"Oyo Group":["Hospitality",""],"Apple":["Consumer Electronics",""],"BBK Electronics":["Consumer Electronics",""],"Imagine Marketing":["Consumer Electronics",""],"Lenovo":["Consumer Electronics",""],"Nexxbase Marketing (Bose)":["Consumer Electronics",""],"Samsung Group":["Consumer Electronics",""],"Xiaomi":["Consumer Electronics",""],"Motorola":["Consumer Electronics",""],"Bayport International":["Consumer Electronics",""],"Zoho Corporation":["B2B SaaS",""],"eTechAces Marketing & Consulting":["B2B SaaS",""],"Bennett & Coleman":["Media",""],"Playsimple Games":["Gaming",""],"ShareChat":["Social Media",""],"Spotify":["Media",""],"The Walt Disney Company":["Media",""],"Sony Corporation":["Media",""],"Essel Group":["Media",""],"Info Edge":["Jobs/Matrimony",""],"People Interactive (shaadi)":["Jobs/Matrimony",""],"Matrimony.com":["Jobs/Matrimony",""],"Shaadi.com":["Jobs/Matrimony",""],"Magicbricks":["Real Estate",""],"Nobroker Technologies Solutions":["Real Estate",""],"Livspace":["Real Estate",""],"Hyphen":["Real Estate",""],"Blue Dart":["Logistics",""],"Bharti":["Telecom",""],"Ferns N Petals Pvt. Ltd.":["Gifting",""],"fnp.com":["Gifting",""],"Tanishq":["Lifestyle",""],"Titan":["Lifestyle",""],"Uniqlo":["Lifestyle",""],"Haier":["Home Appliances",""],"Urban Company":["Urban Services",""],"Aditya Birla Group":["Conglomerate",""],"Reliance Industries":["Conglomerate",""]};
+
+function normAM(s){s=(s||"").trim();if(!s||s==="—")return"";if(/bijal/i.test(s))return"Bijal Panchmatiya";return s;}
+function normType(s){s=(s||"").toLowerCase();if(s.includes("paid"))return"paid";if(s.includes("top"))return"top";if(s.includes("other"))return"other";return"other";}
+function normStatus(s){s=(s||"").trim().toLowerCase();if(!s||s==="—")return"notreach";if(s==="live")return"live";if(s==="uat")return"uat";if(s.includes("dev"))return"dev";if(s.includes("approval"))return"approved";if(s.includes("discussion")||s.includes("meeting")||s==="interested")return"conv";if(s==="pitched")return"pitched";if(s.includes("declined")||s.includes("let it go")||s.includes("not interested")||s.includes("hold"))return"declined";return"notreach";}
+
+function splitCSV(line){const r=[];let c="",q=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"')q=!q;else if(ch===','&&!q){r.push(c);c="";}else c+=ch;}r.push(c);return r.map(x=>x.trim().replace(/^"|"$/g,""));}
+
+function parseAndLoad(text){
+  const lines=text.split(/\r?\n/).map(l=>l.trimEnd());
+  let hi=0;
+  for(let i=0;i<Math.min(5,lines.length);i++){if(lines[i].toLowerCase().includes("type of incentive")){hi=i;break;}}
+  const hd=splitCSV(lines[hi]).map(h=>h.toLowerCase());
+  // detect brand column — could be 'client' or 'parent organization name'
+  const cb=hd.findIndex(h=>h.includes("parent organization")||h==="client");
+  const ct=hd.findIndex(h=>h.includes("type of incentive"));
+  const ca=hd.findIndex(h=>h.includes("p2a am"));
+  const cs=hd.findIndex(h=>h.includes("status"));
+  const cm=hd.findIndex(h=>h.includes("account manager"));
+  const parsed=[];
+  for(let i=hi+1;i<lines.length;i++){
+    const c=splitCSV(lines[i]);
+    const brand=(c[cb]||"").trim();
+    if(!brand||brand==="—"||brand.length<2||brand==="Account Manager"||brand==="Grand Total")continue;
+    const ind=INDUSTRY_MAP[brand]||["",""];
+    parsed.push({b:brand,t:normType(c[ct]||""),a:normAM(c[ca]||c[cm]||""),s:normStatus(c[cs]||""),i:ind[0],si:ind[1]});
+  }
+  return parsed;
+}
+
+function handleCSV(input){
+  const file=input.files[0];
+  if(!file)return;
+  const st=document.getElementById("uploadStatus");
+  st.textContent="Reading…";st.style.color="#6B7A99";
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const parsed=parseAndLoad(e.target.result);
+      if(!parsed.length)throw new Error("No brands found — check the file");
+      // replace DATA in place
+      DATA.length=0;
+      parsed.forEach(r=>DATA.push(r));
+      // update header count
+      document.querySelector(".hdr span:last-child").textContent=`${DATA.length} brands · Combined TAL · Updated ${new Date().toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}`;
+      clr();
+      st.textContent=`✅ ${DATA.length} brands loaded from ${file.name}`;
+      st.style.color="#15803D";
+    }catch(err){
+      st.textContent=`❌ Error: ${err.message}`;st.style.color="#991B1B";
+    }
+    input.value="";
+  };
+  reader.readAsText(file);
+}
 
 function init(){
   const ct={total:DATA.length};Object.keys(SC).forEach(k=>ct[k]=0);DATA.forEach(r=>ct[r.s]++);
